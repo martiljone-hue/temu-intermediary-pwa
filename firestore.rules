@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidProduct(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.temuGoodsId is string && data.temuGoodsId.size() >= 1 && data.temuGoodsId.size() <= 80 &&
+             data.originalTitle is string && data.originalTitle.size() >= 1 && data.originalTitle.size() <= 300 &&
+             data.darijaTitle is string && data.darijaTitle.size() >= 1 && data.darijaTitle.size() <= 300 &&
+             data.darijaPitch is string && data.darijaPitch.size() >= 1 && data.darijaPitch.size() <= 600 &&
+             data.neighborhoodTag is string && data.neighborhoodTag.size() >= 1 && data.neighborhoodTag.size() <= 100 &&
+             data.priceMad is int && data.priceMad >= 1 && data.priceMad <= 50000 &&
+             data.salesVolume is string && data.salesVolume.size() >= 1 && data.salesVolume.size() <= 60 &&
+             data.imageKey is string && data.imageKey.size() >= 1 && data.imageKey.size() <= 60 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidOrder(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.orderCode is string && data.orderCode.size() >= 3 && data.orderCode.size() <= 40 &&
+             data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 120 &&
+             data.customerPhone is string && data.customerPhone.size() >= 10 && data.customerPhone.size() <= 20 &&
+             data.customerAddress is string && data.customerAddress.size() >= 3 && data.customerAddress.size() <= 250 &&
+             data.subtotalMad is int && data.subtotalMad >= 1 && data.subtotalMad <= 100000 &&
+             data.serviceFeeMad is int && data.serviceFeeMad == 15 &&
+             data.totalMad is int && data.totalMad == data.subtotalMad + 15 &&
+             data.status is string && data.status in ['pending_whatsapp', 'confirmed', 'delivered'] &&
+             data.itemTitlesDarija is list && data.itemTitlesDarija.size() >= 1 && data.itemTitlesDarija.size() <= 10 &&
+             data.itemTitlesDarija[0] is string && data.itemTitlesDarija[0].size() <= 300 &&
+             data.itemPricesMad is list && data.itemPricesMad.size() >= 1 && data.itemPricesMad.size() <= 10 &&
+             data.itemPricesMad[0] is int &&
+             data.itemImageKeys is list && data.itemImageKeys.size() >= 1 && data.itemImageKeys.size() <= 10 &&
+             data.itemImageKeys[0] is string && data.itemImageKeys[0].size() <= 60 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/products/{productId} {
+      allow get: if isSignedIn() &&
+                    isValidId(userId) &&
+                    isValidId(productId) &&
+                    request.auth.uid == userId &&
+                    existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(productId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'temuGoodsId', 'originalTitle', 'darijaTitle', 'darijaPitch',
+                         'neighborhoodTag', 'priceMad', 'salesVolume', 'imageKey', 'category',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'temuGoodsId', 'originalTitle', 'darijaTitle', 'darijaPitch',
+                         'neighborhoodTag', 'priceMad', 'salesVolume', 'imageKey', 'category',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidProduct(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(productId) &&
+                       request.auth.uid == userId &&
+                       isValidProduct(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().temuGoodsId == existing().temuGoodsId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'darijaTitle', 'darijaPitch', 'neighborhoodTag', 'priceMad', 'salesVolume', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(productId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid;
+    }
+
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isSignedIn() &&
+                    isValidId(userId) &&
+                    isValidId(orderId) &&
+                    request.auth.uid == userId &&
+                    existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(orderId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'orderCode', 'customerName', 'customerPhone', 'customerAddress',
+                         'subtotalMad', 'serviceFeeMad', 'totalMad', 'status',
+                         'itemTitlesDarija', 'itemPricesMad', 'itemImageKeys',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'orderCode', 'customerName', 'customerPhone', 'customerAddress',
+                         'subtotalMad', 'serviceFeeMad', 'totalMad', 'status',
+                         'itemTitlesDarija', 'itemPricesMad', 'itemImageKeys',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidOrder(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(orderId) &&
+                       request.auth.uid == userId &&
+                       isValidOrder(incoming()) &&
+                       existing().status != 'delivered' &&
+                       incoming().userId == existing().userId &&
+                       incoming().orderCode == existing().orderCode &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'status', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(orderId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Mazagan Proxy",
+  "description": "Automated El Jadida Temu proxy storefront, Moroccan Darija AI localizer, WhatsApp checkout, A4 white-label receipt generator, and full-stack automation blueprint.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Mazagan Proxy</string>
+    <string name="brand_subtitle">وسيط تيمو المحلي بمدينة الجديدة • 0% زيادة على الثمن</string>
+    <string name="sign_in_with_google">تسجيل الدخول عبر Google</string>
+    <string name="tab_storefront">المتجر</string>
+    <string name="tab_smart_employee">الموظف الذكي AI</string>
+    <string name="tab_receipts">تواصيل A4</string>
+    <string name="tab_blueprint">الكود والأتمتة</string>
+    <string name="service_fee_notice">عمولة الخدمة والتوصيل المحلي فالجديدة: +15 درهم فقط</string>
+    <string name="checkout_title">إتمام الطلب عبر واتساب</string>
+    <string name="full_name_label">الاسم الكامل</string>
+    <string name="phone_label">رقم الهاتف المغربي (06 / 07)</string>
+    <string name="address_label">العنوان الكامل فالجديدة</string>
+    <string name="order_whatsapp_button">أكد الطلب دابا عبر واتساب</string>
+    <string name="export_pdf_button">تصدير ومشاركة توصيل A4 PDF</string>
+</resources>

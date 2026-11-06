@@ -1,0 +1,34 @@
+name: Smart Employee Daily Temu Sync (El Jadida)
+
+on:
+  schedule:
+    # Runs automatically every day at 02:00 AM
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-temu-to-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests google-genai supabase python-dotenv
+
+      - name: Execute Smart Employee Localization Pipeline
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          RAPIDAPI_HOST: ${{ secrets.RAPIDAPI_HOST }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python backend/smart_employee.py

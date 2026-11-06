@@ -1,0 +1,175 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Temu proxy product localized into Moroccan Darija for El Jadida buyers with 0% price markup.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user owning this catalog item."
+        },
+        "temuGoodsId": {
+          "type": "string",
+          "description": "Original supplier product identifier."
+        },
+        "originalTitle": {
+          "type": "string",
+          "description": "Original English/French supplier title before AI localization."
+        },
+        "darijaTitle": {
+          "type": "string",
+          "description": "AI-localized Moroccan Darija product title targeting El Jadida."
+        },
+        "darijaPitch": {
+          "type": "string",
+          "description": "AI-localized Moroccan Darija marketing description for El Jadida buyers."
+        },
+        "neighborhoodTag": {
+          "type": "string",
+          "description": "Local El Jadida delivery neighborhood highlight."
+        },
+        "priceMad": {
+          "type": "integer",
+          "description": "Exact regular Temu price in MAD without markup."
+        },
+        "salesVolume": {
+          "type": "string",
+          "description": "Formatted sales volume indicator."
+        },
+        "imageKey": {
+          "type": "string",
+          "description": "Product visual key for rendering local studio photography."
+        },
+        "category": {
+          "type": "string",
+          "description": "Product category label in Darija."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when product was created (must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when product was last updated (must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "temuGoodsId",
+        "originalTitle",
+        "darijaTitle",
+        "darijaPitch",
+        "neighborhoodTag",
+        "priceMad",
+        "salesVolume",
+        "imageKey",
+        "category",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ProxyOrder": {
+      "title": "ProxyOrder",
+      "description": "El Jadida proxy customer order with fixed 15 MAD service fee and white-labeled receipt metadata.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user who created/manages the order."
+        },
+        "orderCode": {
+          "type": "string",
+          "description": "Human-readable white-label order reference code."
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Customer full name."
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Validated Moroccan phone number."
+        },
+        "customerAddress": {
+          "type": "string",
+          "description": "El Jadida delivery address."
+        },
+        "subtotalMad": {
+          "type": "integer",
+          "description": "Sum of exact Temu product prices in MAD."
+        },
+        "serviceFeeMad": {
+          "type": "integer",
+          "description": "Fixed 15 MAD proxy service fee."
+        },
+        "totalMad": {
+          "type": "integer",
+          "description": "Final order total in MAD including the 15 MAD fee."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending_whatsapp",
+            "confirmed",
+            "delivered"
+          ],
+          "description": "Current fulfillment status of the proxy order."
+        },
+        "itemTitlesDarija": {
+          "type": "array",
+          "description": "White-labeled Moroccan Darija item titles (up to 10 items)."
+        },
+        "itemPricesMad": {
+          "type": "array",
+          "description": "Individual product prices in MAD (up to 10 items)."
+        },
+        "itemImageKeys": {
+          "type": "array",
+          "description": "Product image keys for dynamic A4 receipt scaling (up to 10 items)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when order was created (must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when order was updated (must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "orderCode",
+        "customerName",
+        "customerPhone",
+        "customerAddress",
+        "subtotalMad",
+        "serviceFeeMad",
+        "totalMad",
+        "status",
+        "itemTitlesDarija",
+        "itemPricesMad",
+        "itemImageKeys",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "User-scoped catalog of Temu products localized into El Jadida Moroccan Darija."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/ProxyOrder"
+      },
+      "description": "User-scoped El Jadida proxy orders for WhatsApp confirmation and white-labeled A4 PDF receipts."
+    }
+  }
+}
